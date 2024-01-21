@@ -1,0 +1,56 @@
+// Project 47 receiver
+
+#define LORAFREQ (915000000L)
+#include <SPI.h>
+#include <LoRa.h>
+
+void takeAction(int packetSize)
+// things to do when data received over LoRa wireless
+{
+  char incoming[4] = "";
+  int k, n;
+  for (int i = 0; i < packetSize; i++)
+  {
+    k = i;
+    if (k > 6)
+    {
+      k = 18; //make sure we don't write past end of string
+    }
+    incoming[k] = (char)LoRa.read();
+  }
+  // check the three character code sent from transmitter is correct
+  if (incoming[0] != 'A')
+  {
+    return; // if not 'A', stop function and go back to void loop()
+  }
+  if (incoming[1] != 'B')
+  {
+    return; // if not 'B', stop function and go back to void loop()
+  }
+  if (incoming[2] != 'C')
+  {
+    return; // if not 'C', stop function and go back to void loop()
+  }
+  // if made it this far, the correct code has been received from transmitter. Now to do something
+  if (incoming[3] == '1')
+  {
+    digitalWrite(7, HIGH);
+  }
+  if (incoming[3] == '0')
+  {
+    digitalWrite(7, LOW);
+  }
+}
+
+void setup()
+{
+  pinMode(7, OUTPUT);
+  LoRa.begin(LORAFREQ); // start up LoRa at specified frequency
+  LoRa.onReceive(takeAction); // call function "takeAction" when data received over LoRa wireless
+  LoRa.receive(); // start receiving
+  Serial.begin(9600); /// for debug <===============================================================================================
+}
+
+void loop()
+{
+}
